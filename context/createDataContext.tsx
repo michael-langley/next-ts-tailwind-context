@@ -1,10 +1,7 @@
 import React from 'react';
 import { Action, Dispatch } from 'trhc-sample';
 
-interface ContextProps<T, F> {
-  state: T;
-  actions: BoundActions<F>;
-}
+type ContextProps<T, F> = T & F;
 
 type Reducer<T> = (state: T, action: Action) => T;
 
@@ -28,7 +25,7 @@ function createDataContext<T, F>(reducer: Reducer<T>, actions: Actions, defaultV
       boundActions[key] = actions[key](dispatch);
     }
 
-    return <Context.Provider value={{ state, actions: boundActions }}>{children}</Context.Provider>;
+    return <Context.Provider value={{ ...state, ...boundActions }}>{children}</Context.Provider>;
   };
 
   return { Context, Provider };
