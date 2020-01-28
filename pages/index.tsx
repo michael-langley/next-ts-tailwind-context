@@ -2,6 +2,7 @@ import { NextPage } from 'next';
 import { AuthContext } from '../context/index';
 import React from 'react';
 import Link from 'next/link';
+import Button from '../components/Button';
 
 const Home: NextPage<{ userAgent: string }> = ({ userAgent }) => {
   const data = React.useContext(AuthContext);
@@ -12,6 +13,9 @@ const Home: NextPage<{ userAgent: string }> = ({ userAgent }) => {
       <Link href='/page2'>
         <a>Page2</a>
       </Link>
+      <Button type='button' className='bg-teal-400 ' onClick={() => console.log('Button Clicked')}>
+        Click This Button
+      </Button>
     </div>
   );
 };
