@@ -7,7 +7,8 @@ declare module 'trhc-sample' {
   export type Dispatch = React.Dispatch<Action>;
 
   export interface AuthState {
-    user: null | User;
+    user: User | null;
+    token: string | null;
   }
 
   export interface User {
