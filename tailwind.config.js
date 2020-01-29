@@ -1,3 +1,5 @@
+const { colors } = require('tailwindcss/defaultTheme')
+
 module.exports = {
   theme: {
     extend: {
@@ -9,6 +11,10 @@ module.exports = {
         '2/3': '66.666667%',
         '3/4': '75%',
       },
+      colors: {
+        primary: colors.indigo,
+        secondary: colors.green,
+      }
     },
     customForms: theme => ({
       dark: {

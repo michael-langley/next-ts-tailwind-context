@@ -8,9 +8,11 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const Button = (props: Props) => {
   const { onClick, children, ...rest } = props;
   return (
-    <button {...rest} onClick={onClick} className={`text-teal-900 ${rest.className}`}>
-      {children}
-    </button>
+    <div>
+      <button {...rest} onClick={onClick} className={`text-teal-900 ${rest.className}`}>
+        {children}
+      </button>
+    </div>
   );
 };
 

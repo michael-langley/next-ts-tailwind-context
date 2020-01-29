@@ -6,6 +6,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: 'Inter', sans-serif;
+  @apply text-gray-900;
 }
 
 @supports (font-variation-settings: normal) {
