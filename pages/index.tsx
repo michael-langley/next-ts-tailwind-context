@@ -1,84 +1,30 @@
 import React from 'react';
-import { NextPage } from 'next';
 import axios from 'axios';
 import Button from '../components/Button';
-import { AuthContext } from '../context';
+import { connect } from 'react-redux';
+import { AppState } from 'trhc-sample';
+import { updateToken, getApigeeToken } from '../store/modules/auth';
+import { getGeneObservation, getPatientObservation } from '../store/modules/observations';
 
-type ComponentStates = 'ready' | 'loading' | 'success' | 'fail';
-
-const Home: NextPage = () => {
-  const { updateToken, token } = React.useContext(AuthContext);
-  const [compState, setCompState] = React.useState<ComponentStates>('ready');
-  const [patientData, setPatientData] = React.useState<any>();
-  const [geneData, setGeneData] = React.useState<any>();
-
-  const revertToReadyState = () => setTimeout(() => setCompState('ready'), 2000);
-
-  const getApigeeToken = async () => {
-    setCompState('loading');
-    try {
-      const res = await axios({
-        method: 'GET',
-        url: '/api/auth',
-      });
-
-      updateToken(`Bearer ${res.data.accessToken}`);
-      setCompState('success');
-      revertToReadyState();
-    } catch (error) {
-      setCompState('fail');
-      revertToReadyState();
-      throw new Error(error.message);
-    }
-  };
-
-  const getPatientObservation = async () => {
-    setCompState('loading');
-    try {
-      const res = await axios({
-        method: 'GET',
-        url: '/api/patient-observation',
-        params: {
-          token,
-        },
-      });
-
-      setPatientData(res.data.data);
-      setCompState('success');
-      revertToReadyState();
-    } catch (error) {
-      setCompState('fail');
-      revertToReadyState();
-      throw new Error(error.message);
-    }
-  };
-
-  const getGeneObservation = async () => {
-    setCompState('loading');
-    try {
-      const res = await axios({
-        method: 'GET',
-        url: '/api/gene-observation',
-        params: {
-          token,
-        },
-      });
-
-      setGeneData(res.data.data);
-      setCompState('success');
-      revertToReadyState();
-    } catch (error) {
-      setCompState('fail');
-      revertToReadyState();
-      throw new Error(error.message);
-    }
-  };
-
+// tslint:disable: no-shadowed-variable
+const Home = ({
+  token,
+  getApigeeToken,
+  getGeneObservation,
+  getPatientObservation,
+  geneObservations,
+  patientObservations,
+  authCompState,
+  obsCompState,
+}: ConnectedProps) => {
   return (
     <div className='w-5/6 py-12 mx-auto px-12'>
       <div className='flex justify-between items-center mb-6'>
         <h1 className='text-secondary-600 text-3xl tracking-tighter'>Welcome to the Sample App</h1>
-        <p>Page State: {compState}</p>
+        <div>
+          <p>Auth State: {authCompState}</p>
+          <p>Observations State: {obsCompState}</p>
+        </div>
       </div>
 
       {!token && (
@@ -96,11 +42,11 @@ const Home: NextPage = () => {
           Get PGX Gene Observations
         </Button>
       )}
-      {patientData && (
+      {patientObservations && (
         <div>
           <h3 className='mt-12 text-xl tracking-tight font-semibold'>PGX Observations by Patient</h3>
           <div className='mt-6'>
-            {patientData.entry.map((entry: any, i: number) => {
+            {patientObservations.entry.map((entry: any, i: number) => {
               return (
                 <div key={i} className='mt-5'>
                   <div className='flex items-baseline flex-wrap'>
@@ -124,11 +70,11 @@ const Home: NextPage = () => {
         </div>
       )}
 
-      {geneData && (
+      {geneObservations && (
         <div>
           <h3 className='mt-12 text-xl tracking-tight font-semibold'>PGX Observations by Gene</h3>
           <div className='mt-6'>
-            {geneData.entry.map((entry: any, i: number) => {
+            {geneObservations.entry.map((entry: any, i: number) => {
               return (
                 <div key={i} className='mt-5'>
                   <div className='flex items-baseline flex-wrap'>
@@ -155,4 +101,17 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+const mapStateToProps = ({ auth, observations }: AppState) => {
+  return {
+    ...auth,
+    ...observations,
+    authCompState: auth.componentState,
+    obsCompState: observations.componentState,
+  };
+};
+
+const actions = { updateToken, getApigeeToken, getGeneObservation, getPatientObservation };
+
+type ConnectedProps = typeof actions & ReturnType<typeof mapStateToProps>;
+
+export default connect(mapStateToProps, actions)(Home);

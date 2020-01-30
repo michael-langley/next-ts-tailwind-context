@@ -1,44 +1,56 @@
-import { AuthState, Action, Dispatch, AppState, ThunkReturn } from 'trhc-sample';
+import { AuthState, Action, Dispatch, ThunkReturn, ComponentStates } from 'trhc-sample';
+import axios from 'axios';
 
 enum Actions {
-  AddUser = 'ADD_USER',
-  RemoveUser = 'REMOVE_USER',
   UpdateToken = 'UPDATE_TOKEN',
   RemoveToken = 'REMOVE_TOKEN',
+  SetComponentState = 'SET_AUTH_COMPONENT_STATE',
 }
 
 const initialState: AuthState = {
-  user: {
-    name: 'Test User',
-    id: 1,
-  },
   token: null,
+  componentState: 'ready',
 };
 
-export const changeUser = (email: string, password: string): ThunkReturn => async (dispatch: Dispatch) => {
-  setTimeout(() => {
-    dispatch({ type: Actions.AddUser, payload: { name: email, id: password } });
-  }, 2000);
+const setComponentState = (state: ComponentStates) => (dispatch: Dispatch) => {
+  dispatch({
+    type: Actions.SetComponentState,
+    payload: state,
+  });
 };
 
-export const removeUser = async () => (dispatch: Dispatch) => {
-  dispatch({ type: Actions.RemoveUser });
-};
+const revertToReadyState = (): ThunkReturn => async (dispatch: Dispatch) => setTimeout(() => dispatch(setComponentState('ready')), 2000);
 
 export const updateToken = (token: string) => (dispatch: Dispatch) => {
   dispatch({ type: Actions.UpdateToken, payload: token });
 };
 
+export const getApigeeToken = (): ThunkReturn => async (dispatch: Dispatch) => {
+  dispatch(setComponentState('loading'));
+  try {
+    const res = await axios({
+      method: 'GET',
+      url: '/api/auth',
+    });
+
+    dispatch(updateToken(`Bearer ${res.data.accessToken}`) as any);
+    dispatch(setComponentState('success'));
+    dispatch(revertToReadyState());
+  } catch (error) {
+    dispatch(setComponentState('fail'));
+    dispatch(revertToReadyState());
+    console.log({ error });
+  }
+};
+
 export default (state: AuthState = initialState, action: Action): AuthState => {
   switch (action.type) {
-    case Actions.AddUser:
-      return { ...state, user: action.payload };
-    case Actions.RemoveUser:
-      return { ...state, user: null };
     case Actions.UpdateToken:
       return { ...state, token: action.payload };
-    case Actions.RemoveUser:
+    case Actions.RemoveToken:
       return { ...state, token: null };
+    case Actions.SetComponentState:
+      return { ...state, componentState: action.payload };
     default:
       return state;
   }
